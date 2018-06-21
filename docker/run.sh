@@ -5,6 +5,7 @@ PROXY_SKIP_VERIFY="${PROXY_SKIP_VERIFY:-false}"
 INSECURE_PROXY=""
 CADDY_OPTIONS="${CADDY_OPTIONS:-}"
 PORT="${PORT:-8000}"
+ANGULAR_BASEPATH="${ANGULAR_BASEPATH}"
 
 {
     echo "Landoop Kafka Connect UI ${KAFKA_CONNECT_UI_VERSION}"
@@ -24,6 +25,12 @@ PORT="${PORT:-8000}"
 
     if echo "$PROXY" | egrep -sq "true|TRUE|y|Y|yes|YES|1"; then
         echo "Enabling proxy. You can disable this via PROXY=false."
+        if [[ -n "$ANGULAR_BASEPATH" ]]; then
+            echo "ANGULAR_BASEPATH is set to '$ANGULAR_BASEPATH'."
+#             cat <<EOF >/kafka-connect-ui/angular-basepath.js
+# var angular_basepath = "$ANGULAR_BASEPATH"
+# EOF
+        fi
     fi
 
     if echo "$PROXY_SKIP_VERIFY" | egrep -sq "true|TRUE|y|Y|yes|YES|1"; then
@@ -64,7 +71,7 @@ EOF
             cat <<EOF >>/kafka-connect-ui/env.js
    $OPEN_CURL
      NAME: "$CLUSTER_NAME",
-     KAFKA_CONNECT: "/api/$CLUSTER_SANITIZED_NAME"
+     KAFKA_CONNECT: "$ANGULAR_BASEPATH/api/$CLUSTER_SANITIZED_NAME"
    }
 EOF
         else
@@ -76,7 +83,11 @@ EOF
 EOF
         fi
     done
-    echo "]" >> /kafka-connect-ui/env.js
+    echo "];" >> /kafka-connect-ui/env.js
+
+    cat <<EOF >>/kafka-connect-ui/env.js
+var angular_basepath = "$ANGULAR_BASEPATH";
+EOF
 
     if [[ -n "${CADDY_OPTIONS}" ]]; then
         echo "Applying custom options to Caddyfile"

@@ -13,7 +13,7 @@ RUN wget "https://github.com/mholt/caddy/releases/download/v0.10.11/caddy_v0.10.
     && rm -f /caddy.tgz
 
 # Add and Setup Kafka Connect UI
-ENV KAFKA_CONNECT_UI_VERSION="6"
+ENV KAFKA_CONNECT_UI_VERSION="0.9.5"
 RUN wget "https://github.com/Landoop/kafka-connect-ui/releases/download/v.${KAFKA_CONNECT_UI_VERSION}/kafka-connect-ui-${KAFKA_CONNECT_UI_VERSION}.tar.gz" -O /kafka-connect-ui.tar.gz \
     && mkdir /kafka-connect-ui \
     && tar xzf /kafka-connect-ui.tar.gz -C /kafka-connect-ui \
@@ -23,6 +23,8 @@ RUN wget "https://github.com/Landoop/kafka-connect-ui/releases/download/v.${KAFK
 ADD Caddyfile /caddy/Caddyfile.template
 ADD run.sh /
 RUN chmod +x /run.sh
+
+ADD index.html /kafka-connect-ui/index.html
 
 EXPOSE 8000
 ENTRYPOINT ["/run.sh"]
